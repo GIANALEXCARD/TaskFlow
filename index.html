@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TaskFlow — Gestor de Tareas Inteligente. Aplicación de gestión de tareas con metodología ágil y código limpio.">
+    <title>TaskFlow — Gestor de Tareas Inteligente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- ===== HEADER ===== -->
+        <header class="app-header" id="app-header">
+            <div class="app-logo">
+                <div class="logo-icon">✔</div>
+                <span class="logo-text">TaskFlow</span>
+            </div>
+            <p class="app-subtitle">Gestor de Tareas</p>
+        </header>
+
+        <!-- ===== ESTADÍSTICAS ===== -->
+        <section class="stats-grid" id="stats-grid">
+            <div class="stat-card" id="stat-total">
+                <div class="stat-icon">📊</div>
+                <div class="stat-value" id="stat-total-value">0</div>
+                <div class="stat-label">Total Tareas</div>
+            </div>
+            <div class="stat-card" id="stat-pending">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-value" id="stat-pending-value">0</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+            <div class="stat-card" id="stat-progress">
+                <div class="stat-icon">🔄</div>
+                <div class="stat-value" id="stat-progress-value">0</div>
+                <div class="stat-label">En Progreso</div>
+            </div>
+            <div class="stat-card" id="stat-completed">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value" id="stat-completed-value">0</div>
+                <div class="stat-label">Completadas</div>
+            </div>
+        </section>
+
+        <!-- ===== BARRA DE PROGRESO ===== -->
+        <section class="progress-section" id="progress-section">
+            <span class="progress-label">Progreso General</span>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%"></div>
+            </div>
+            <span class="progress-percentage" id="progress-percentage">0%</span>
+        </section>
+
+        <!-- ===== TOOLBAR ===== -->
+        <section class="toolbar" id="toolbar">
+            <button class="btn btn-primary" id="btn-add-task" onclick="openAddModal()">
+                ➕ Nueva Tarea
+            </button>
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="Buscar tareas..." oninput="handleFilterChange()">
+            </div>
+            <select class="filter-select" id="filter-status" onchange="handleFilterChange()">
+                <option value="">Todos los estados</option>
+                <option value="pendiente">📋 Pendiente</option>
+                <option value="en_progreso">🔄 En Progreso</option>
+                <option value="completada">✅ Completada</option>
+            </select>
+            <select class="filter-select" id="filter-priority" onchange="handleFilterChange()">
+                <option value="">Todas las prioridades</option>
+                <option value="alta">🔴 Alta</option>
+                <option value="media">🟡 Media</option>
+                <option value="baja">🟢 Baja</option>
+            </select>
+            <button class="btn btn-secondary" id="btn-export" onclick="handleExport()" title="Exportar JSON">
+                📥 Exportar
+            </button>
+            <button class="btn btn-secondary" id="btn-import" onclick="openImportModal()" title="Importar JSON">
+                📤 Importar
+            </button>
+        </section>
+
+        <!-- ===== LISTA DE TAREAS ===== -->
+        <main class="task-list" id="task-list">
+            <!-- Las tareas se renderizan aquí dinámicamente -->
+        </main>
+
+        <!-- ===== FOOTER ===== -->
+        <footer class="app-footer">
+            <p>TaskFlow v1.0 — Desarrollado con metodologías ágiles y código limpio</p>
+            <p style="margin-top:4px;">Producto Académico N° 1 • Construcción de Software • 2026</p>
+        </footer>
+    </div>
+
+    <!-- ===== MODAL: CREAR/EDITAR TAREA ===== -->
+    <div class="modal-overlay" id="modal-task">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-task-title">Nueva Tarea</h2>
+                <button class="modal-close" onclick="closeModal('modal-task')">&#10005;</button>
+            </div>
+            <div class="modal-body">
+                <form id="task-form" onsubmit="handleTaskSubmit(event)">
+                    <input type="hidden" id="task-edit-id" value="">
+                    <div class="form-group">
+                        <label for="task-title-input">Título *</label>
+                        <input type="text" id="task-title-input" placeholder="Ej: Estudiar para el examen de matemáticas" maxlength="100" required>
+                        <div class="form-error" id="error-title">⚠️ <span></span></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-desc-input">Descripción</label>
+                        <textarea id="task-desc-input" placeholder="Describe los detalles de la tarea..." maxlength="500"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="task-priority-input">Prioridad</label>
+                            <select id="task-priority-input">
+                                <option value="media">🟡 Media</option>
+                                <option value="alta">🔴 Alta</option>
+                                <option value="baja">🟢 Baja</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-date-input">Fecha de vencimiento</label>
+                            <input type="date" id="task-date-input">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-task')">Cancelar</button>
+                <button class="btn btn-primary" onclick="handleTaskSubmit(event)" id="btn-submit-task">💾 Guardar Tarea</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: IMPORTAR JSON ===== -->
+    <div class="modal-overlay" id="modal-import">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>📤 Importar Tareas</h2>
+                <button class="modal-close" onclick="closeModal('modal-import')">&#10005;</button>
+            </div>
+            <div class="modal-body modal-import">
+                <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+                    Pega el contenido JSON exportado previamente. Esto reemplazará todas las tareas actuales.
+                </p>
+                <textarea id="import-json-input" placeholder='[{"title": "Mi tarea", ...}]'></textarea>
+                <div class="form-error" id="error-import" style="margin-top:8px;">⚠️ <span></span></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-import')">Cancelar</button>
+                <button class="btn btn-primary" onclick="handleImport()">📤 Importar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: CONFIRMAR ELIMINACIÓN ===== -->
+    <div class="modal-overlay" id="modal-confirm">
+        <div class="modal" style="max-width:420px;">
+            <div class="modal-header">
+                <h2>⚠️ Confirmar</h2>
+                <button class="modal-close" onclick="closeModal('modal-confirm')">&#10005;</button>
+            </div>
+            <div class="modal-body">
+                <p class="confirm-text" id="confirm-text">¿Estás seguro de que deseas eliminar esta tarea?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-confirm')">Cancelar</button>
+                <button class="btn btn-danger" id="btn-confirm-action" onclick="confirmDelete()">🗑️ Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ===== SCRIPTS (orden de dependencias) ===== -->
+    <script src="js/exceptions.js"></script>
+    <script src="js/task.js"></script>
+    <script src="js/storageService.js"></script>
+    <script src="js/taskManager.js"></script>
+    <script src="js/notificationService.js"></script>
+    <script src="js/uiController.js"></script>
+
+</body>
+</html>
